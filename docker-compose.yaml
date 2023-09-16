@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+  client_mongo:
+    image: mongo:latest
+    container_name: client_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - client_mongo_data:/data/db
+
+  service_mongo:
+    image: mongo:latest
+    container_name: service_mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - service_mongo_data:/data/db
+
+  client:
+    image: demo:v1
+    command: python src/client.py
+    network_mode: "host"
+    depends_on:
+      - service
+      - client_mongo
+    environment:
+      MONGO_URI: mongodb://client_mongo:27017/mydatabase
+
+  service:
+    image: demo:v1
+    command: python src/branch.py
+    network_mode: "host"
+    depends_on:
+      - service_mongo
+    environment:
+      MONGO_URI: mongodb://service_mongo:27017/mydatabase
+
+volumes:
+  client_mongo_data:
+  service_mongo_data:

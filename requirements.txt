@@ -1,0 +1,5 @@
+grpcio==1.57.0
+grpcio-reflection==1.57.0
+grpcio-tools==1.57.0
+protobuf==4.24.1
+pymongo==4.5.0
