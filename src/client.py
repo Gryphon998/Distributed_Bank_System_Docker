@@ -1,8 +1,6 @@
 from __future__ import print_function
-
 import logging
 import pymongo
-
 import grpc
 import message_pb2_grpc
 import message_pb2
@@ -15,6 +13,7 @@ def run():
         db = client['database']
         clock_map = db['clock_map']
         clock = {'clock': 1}
+        # Init Local clock
         clock_map.insert_one(clock)
         stub = message_pb2_grpc.BankServiceStub(channel)
         response = stub.MsgDelivery(message_pb2.MsgDeliveryRequest(id=1, interface="deposit", money=200, clock=1))

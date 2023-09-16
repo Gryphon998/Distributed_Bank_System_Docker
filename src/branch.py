@@ -1,12 +1,8 @@
-# coding:utf-8
 import grpc
-import time
 import message_pb2 as pb2
 import message_pb2_grpc as pb2_grpc
-from grpc_reflection.v1alpha import reflection
 import pymongo
 from concurrent import futures
-from grpc_reflection.v1alpha import reflection
 
 
 class Branch(pb2_grpc.BankServiceServicer):
@@ -16,17 +12,9 @@ class Branch(pb2_grpc.BankServiceServicer):
         self.id = id
         # balance of this branch
         self.balance = balance
-        # the bind address for this branch
-        self.bind_address = None
-        # the list of client stubs to communicate with this branch
-        self.stubList = list()
         # set initial logical clock as 0
         self.clock = 0
-        # branch logger to store this branch's activities
-        self.branch_logger = None
-        # event logger to store the events between this branch and its customers
-        self.event_logger = None
-
+        # init the mongoDB database
         self.mongodb_init()
 
     def mongodb_init(self):
@@ -42,8 +30,10 @@ class Branch(pb2_grpc.BankServiceServicer):
             result = self.clock_map.find({'clock': {'$exists': True}})
             for doc in result:
                 local_clock = doc['clock']
+            # Using Lamport clock algorithm to compare local clock and received clock
             new_clock = max(request.clock + 1, local_clock)
             update_clock = {'_id': doc['_id']}
+            # Update local clock
             self.clock_map.update_one(update_clock, {'$set': {'clock': new_clock}})
             result = "hello, " + request.interface + str(request.money)
             print(result)
